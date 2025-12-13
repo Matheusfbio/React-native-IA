@@ -1,48 +1,79 @@
-import { GoogleGenerativeAI } from "@google/generative-ai"
-
-import { Request, Response } from "express"
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import fs from "fs";
+import { Request, Response } from "express";
 
 export async function gemini(req: Request, res: Response) {
   try {
-    res.writeHead(200, {
-      'Content-Type': 'text/event-stream',
-      'Connection': 'keep-alive',
-      'Cache-Control': 'no-cache'
-    })
-    const { prompt } = req.body
-    if (!prompt) {
-      return res.json({
-        error: 'no prompt'
-      })
+    console.log("=== GEMINI SERVER REQUEST ===");
+    console.log("Body:", req.body);
+    console.log("File:", req.file);
+
+    const { input, instructions } = req.body;
+    const file = req.file;
+
+    if (!input) {
+      console.log("No input provided");
+      return res.status(400).json({ error: "no input" });
     }
 
-    const genAIInit = new GoogleGenerativeAI(`${process.env.GEMINI_API_KEY}`)
+    if (!process.env.GEMINI_API_KEY) {
+      console.log("No Gemini API key");
+      return res.status(500).json({ error: "No API key" });
+    }
 
-    // For text-only input, use the gemini-pro model
-    const model = genAIInit.getGenerativeModel({
-      model: "gemini-2.5-flash-lite",
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.5-flash",
     });
-    
-    const geminiResult = await model.generateContentStream(prompt)
+
+    let prompt = input;
+    if (instructions) {
+      prompt = `${instructions}\n\nUsuário: ${input}`;
+    }
+
+    let parts: any[] = [{ text: prompt }];
+
+    // Se há arquivo, adicionar ao prompt
+    if (file) {
+      console.log("Processing file:", file.originalname, file.mimetype);
+      const fileBuffer = fs.readFileSync(file.path);
+      const mimeType = file.mimetype;
+
+      parts.push({
+        inlineData: {
+          data: fileBuffer.toString("base64"),
+          mimeType: mimeType,
+        },
+      });
+
+      // Limpar arquivo temporário
+      fs.unlinkSync(file.path);
+    }
+
+    console.log("Calling Gemini API...");
+    const geminiResult = await model.generateContentStream(parts);
+
+    res.writeHead(200, {
+      "Content-Type": "text/plain",
+    });
 
     if (geminiResult && geminiResult.stream) {
-        await streamToStdout(geminiResult.stream, res)
-      } else {
-        res.end()
-      }
-  
-    } catch (err) {
-      console.log('error in Gemini chat: ', err)
-      res.write('data: [DONE]\n\n')
-      res.end()
+      await streamToStdout(geminiResult.stream, res);
+    } else {
+      console.log("No stream result");
+      res.end("Erro: Sem resposta do Gemini");
     }
+  } catch (err) {
+    console.log("error in Gemini chat: ", err);
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    res.status(500).end("Erro interno: " + errorMessage);
+  }
 }
 
-export async function streamToStdout(stream :any, res: Response) {
+export async function streamToStdout(stream: any, res: Response) {
   for await (const chunk of stream) {
-    const chunkText = chunk.text()
-    res.write(`data: ${JSON.stringify(chunkText)}\n\n`)
+    const chunkText = chunk.text();
+    res.write(chunkText);
   }
-  res.write('data: [DONE]\n\n')
-  res.end()
+  res.end();
 }

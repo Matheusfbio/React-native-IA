@@ -6,7 +6,7 @@ import { gpt } from './gpt'
 import { mistral } from './mistral'
 import { gemini } from './gemini'
 
-const upload = multer()
+const upload = multer({ dest: 'uploads/' })
 
 // assistant API
 import { createAssistant } from './createAssistant'
@@ -21,7 +21,7 @@ router.post('/claude', claude)
 router.post('/cohere', cohere)
 router.post('/gpt', gpt)
 router.post('/mistral', mistral)
-router.post('/gemini', gemini)
+router.post('/gemini', upload.single('file'), gemini)
 
 // assistant
 router.post('/create-assistant', upload.single('file'), createAssistant)

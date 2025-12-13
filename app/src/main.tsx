@@ -1,23 +1,23 @@
-import { useContext, useRef, useCallback } from 'react';
-import { StyleSheet, Text, View, Button } from 'react-native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Chat, Images, Settings, Assistant } from './screens'
-import { Header } from './components'
-import FeatherIcon from '@expo/vector-icons/Feather'
+import { useContext, useRef, useCallback } from "react";
+import { StyleSheet, Text, View, Button } from "react-native";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { Chat, Images, Settings, Assistant } from "./screens";
+import { Header } from "./components";
+import FeatherIcon from "@expo/vector-icons/Feather";
 import {
   SafeAreaProvider,
   useSafeAreaInsets,
-} from 'react-native-safe-area-context'
-import { ThemeContext } from './context'
+} from "react-native-safe-area-context";
+import { ThemeContext } from "./context";
 ///
 
-const Tab = createBottomTabNavigator()
+const Tab = createBottomTabNavigator();
 
 function MainComponent() {
-  const insets = useSafeAreaInsets()
-  const { theme } = useContext(ThemeContext)
-  const styles = getStyles({ theme, insets })
-  
+  const insets = useSafeAreaInsets();
+  const { theme } = useContext(ThemeContext);
+  const styles = getStyles({ theme, insets });
+
   return (
     <View style={styles.container}>
       <Tab.Navigator
@@ -36,11 +36,7 @@ function MainComponent() {
           options={{
             header: () => <Header />,
             tabBarIcon: ({ color, size }) => (
-              <FeatherIcon
-                name="message-circle"
-                color={color}
-                size={size}
-              />
+              <FeatherIcon name="message-circle" color={color} size={size} />
             ),
           }}
         />
@@ -50,15 +46,11 @@ function MainComponent() {
           options={{
             header: () => <Header />,
             tabBarIcon: ({ color, size }) => (
-              <FeatherIcon
-                name="user"
-                color={color}
-                size={size}
-              />
+              <FeatherIcon name="user" color={color} size={size} />
             ),
           }}
         />
-        <Tab.Screen
+        {/* <Tab.Screen
           name="Images"
           component={Images}
           options={{
@@ -71,18 +63,14 @@ function MainComponent() {
               />
             ),
           }}
-        />
+        /> */}
         <Tab.Screen
           name="Settings"
           component={Settings}
           options={{
             header: () => <Header />,
             tabBarIcon: ({ color, size }) => (
-              <FeatherIcon
-                name="sliders"
-                color={color}
-                size={size}
-              />
+              <FeatherIcon name="sliders" color={color} size={size} />
             ),
           }}
         />
@@ -96,16 +84,17 @@ export function Main() {
     <SafeAreaProvider>
       <MainComponent />
     </SafeAreaProvider>
-  )
+  );
 }
 
-const getStyles = ({ theme, insets } : { theme: any, insets: any}) => StyleSheet.create({
-  container: {
-    backgroundColor: theme.backgroundColor,
-    flex: 1,
-    paddingTop: insets.top,
-    paddingBottom: insets.bottom,
-    paddingLeft: insets.left,
-    paddingRight: insets.right,
-  },
-})
+const getStyles = ({ theme, insets }: { theme: any; insets: any }) =>
+  StyleSheet.create({
+    container: {
+      backgroundColor: theme.backgroundColor,
+      flex: 1,
+      paddingTop: insets.top,
+      paddingBottom: insets.bottom,
+      paddingLeft: insets.left,
+      paddingRight: insets.right,
+    },
+  });
