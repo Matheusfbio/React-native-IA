@@ -54,7 +54,11 @@ export async function gemini(req: Request, res: Response) {
     const geminiResult = await model.generateContentStream(parts);
 
     res.writeHead(200, {
-      "Content-Type": "text/plain",
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache",
+      "Connection": "keep-alive",
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Headers": "Cache-Control"
     });
 
     if (geminiResult && geminiResult.stream) {
@@ -73,7 +77,10 @@ export async function gemini(req: Request, res: Response) {
 export async function streamToStdout(stream: any, res: Response) {
   for await (const chunk of stream) {
     const chunkText = chunk.text();
-    res.write(chunkText);
+    if (chunkText) {
+      res.write(`data: ${JSON.stringify(chunkText)}\n\n`);
+    }
   }
+  res.write('data: [DONE]\n\n');
   res.end();
 }
