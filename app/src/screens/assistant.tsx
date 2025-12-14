@@ -79,11 +79,11 @@ export function Assistant() {
 
   async function generateGeminiResponse() {
     try {
-      console.log('=== INICIANDO GEMINI REQUEST ===');
-      console.log('Input:', input);
-      console.log('Instructions:', instructions);
-      console.log('File:', file);
-      console.log('DOMAIN:', DOMAIN);
+      console.log("=== INICIANDO GEMINI REQUEST ===");
+      console.log("Input:", input);
+      console.log("Instructions:", instructions);
+      console.log("File:", file);
+      console.log("DOMAIN:", DOMAIN);
       
       Keyboard.dismiss();
       const fileCopy = file;
