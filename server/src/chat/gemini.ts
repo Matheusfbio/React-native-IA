@@ -23,7 +23,7 @@ export async function gemini(req: Request, res: Response) {
 
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.5-flash",
+      model: "gemini-2.5-flash-lite",
     });
 
     let prompt = input;
@@ -54,11 +54,9 @@ export async function gemini(req: Request, res: Response) {
     const geminiResult = await model.generateContentStream(parts);
 
     res.writeHead(200, {
-      "Content-Type": "text/event-stream",
+      "Content-Type": "text/plain",
       "Cache-Control": "no-cache",
-      "Connection": "keep-alive",
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Headers": "Cache-Control"
+      Connection: "keep-alive",
     });
 
     if (geminiResult && geminiResult.stream) {
@@ -78,9 +76,8 @@ export async function streamToStdout(stream: any, res: Response) {
   for await (const chunk of stream) {
     const chunkText = chunk.text();
     if (chunkText) {
-      res.write(`data: ${JSON.stringify(chunkText)}\n\n`);
+      res.write(chunkText);
     }
   }
-  res.write('data: [DONE]\n\n');
   res.end();
 }
